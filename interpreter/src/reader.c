@@ -69,7 +69,7 @@ static void skip_whitespaces(void) {
     unread_char();
 }
 
-char *read_next_token() {
+char *read_next_token(void) {
     if(!latest_token)
         latest_token = malloc(TOKEN_MAX_SIZE * sizeof(char));
 
@@ -88,6 +88,10 @@ char *read_next_token() {
     }
     latest_token[i] = '\0';
     return latest_token;
+}
+
+void unread_latest_token(void) {
+    unread_chars(strlen(latest_token));
 }
 
 bool check_token(char *expected_token) {

@@ -25,6 +25,7 @@ extern char *latest_token;
 extern void reader_set_input(FILE *in);
 
 extern char *read_next_token(void);
+extern void unread_latest_token(void);
 
 extern bool check_token(char *expected_token);
 extern bool assert_token(char *expected_token);
