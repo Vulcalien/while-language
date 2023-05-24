@@ -46,6 +46,7 @@ ________________________________________________________________________
 #include "main.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "reader.h"
 
@@ -59,9 +60,102 @@ static bool interpreta_programma(void);
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-static bool interpreta_assegnazione(void) {
-    // TODO
+static bool decodifica_variabile(int *index) {
+    char *variable = read_next_token(true);
+
+    int len = strlen(variable);
+    if(len < 2)
+        goto name_not_valid;
+
+    if(variable[0] != 'x')
+        goto name_not_valid;
+
+    char *end;
+    *index = strtol(&variable[1], &end, 10);
+    if(end == &variable[1])
+        goto name_not_valid;
+
+    // Reinserisci qualunque carattere dopo il nome della variabile
+    int number_length = 1;
+    for(int n = *index; n > 9; n /= 10)
+        number_length++;
+    unread_chars(len - 1 - number_length);
+
     return true;
+
+    name_not_valid:
+    fprintf(
+        stderr,
+        "Errore: una variabile del tipo 'xi' era attesa, "
+        "ma e' stato trovato '%s'\n", variable
+    );
+    return false;
+}
+
+static bool assegna_zero(int index_left) {
+
+    return true;
+}
+
+static bool assegna_succ_o_prec(int index_left, bool is_succ) {
+    read_next_token_n(true, 1);
+    if(!assert_token("("))
+        return false;
+
+    int index_right;
+    if(!decodifica_variabile(&index_right))
+        return false;
+
+    int value_right;
+    // TODO get value_right
+
+    if(is_succ)
+        value_right++;
+    else
+        value_right--;
+
+    // TODO assign to index_left
+
+    read_next_token_n(true, 1);
+    if(!assert_token(")"))
+        return false;
+
+    return true;
+}
+
+static bool interpreta_assegnazione(void) {
+    puts("reading assign"); // DEBUG
+
+    int index_left;
+    if(!decodifica_variabile(&index_left))
+        return false;
+
+    read_next_token_n(true, 2);
+    if(!assert_token(":="))
+        return false;
+
+    // Determina quale assegnamento va eseguito
+    read_next_token_n(true, 1);
+    if(check_token("0"))
+        return assegna_zero(index_left);
+
+    unread_chars(1);
+
+    read_next_token_n(true, 4);
+    if(check_token("succ"))
+        return assegna_succ_o_prec(index_left, true);
+    else if(check_token("prec"))
+        return assegna_succ_o_prec(index_left, false);
+
+    unread_latest_token();
+    char *token = read_next_token(true);
+
+    fprintf(
+        stderr,
+        "Errore: '0', 'succ' o 'prec' erano attesi, "
+        "ma e' stato trovato '%s'\n", token
+    );
+    return false;
 }
 
 static bool interpreta_test(bool *value) {
@@ -81,8 +175,8 @@ static bool interpreta_while(void) {
         if(!interpreta_test(&test_value))
             return false;
 
-        if(!test_value)
-            break;
+        /*if(!test_value)*/
+            /*break;*/
 
         read_next_token(true);
         if(!assert_token("do"))
@@ -124,7 +218,9 @@ static bool interpreta_programma(void) {
     // Interpreta una sequenza fino a quando non si incontra 'end'
     unread_latest_token();
     while(true) {
-        interpreta_istruzione();
+        puts("new inst"); // DEBUG
+        if(!interpreta_istruzione())
+            return false;
 
         read_next_token(true);
         if(check_token("end"))
