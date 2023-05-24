@@ -49,6 +49,7 @@ ________________________________________________________________________
 #include <string.h>
 
 #include "reader.h"
+#include "variables.h"
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -93,7 +94,7 @@ static bool decodifica_variabile(int *index) {
 }
 
 static bool assegna_zero(int index_left) {
-
+    set_variable(index_left, 0);
     return true;
 }
 
@@ -106,15 +107,14 @@ static bool assegna_succ_o_pred(int index_left, bool is_succ) {
     if(!decodifica_variabile(&index_right))
         return false;
 
-    int value_right;
-    // TODO get value_right
+    int value_right = get_variable(index_right);
 
     if(is_succ)
         value_right++;
     else
         value_right--;
 
-    // TODO assign to index_left
+    set_variable(index_left, value_right);
 
     read_next_token_n(true, 1);
     if(!assert_token(")"))
