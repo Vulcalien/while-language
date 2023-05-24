@@ -48,7 +48,7 @@ static char read_char(void) {
                 content, content_length + CONTENT_BLOCK_SIZE
             );
         }
-        content[content_length++] = getc(input);
+        content[content_length++] = tolower(getc(input));
     }
 
     return content[reading_index++];
