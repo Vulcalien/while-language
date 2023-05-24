@@ -51,7 +51,7 @@ void set_variable(unsigned int index, int value) {
     }
 
     #ifdef DEBUG
-        printf("\033[1;32mDEBUG: x%d = %d\033[0m\n", index, value);
+        printf("\033[1;31mDEBUG: x%d = %d\033[0m\n", index, value);
     #endif
     (*var)->value = value;
 }

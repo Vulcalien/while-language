@@ -127,8 +127,6 @@ static bool assegna_succ_o_pred(int index_left, bool is_succ,
 }
 
 static bool interpreta_assegnazione(bool should_execute) {
-    puts("reading assign"); // DEBUG
-
     int index_left;
     if(!decodifica_variabile(&index_left))
         return false;
@@ -181,8 +179,6 @@ static bool interpreta_test(bool *value) {
 }
 
 static bool interpreta_while(bool should_execute) {
-    puts("reading while"); // DEBUG
-
     read_next_token(true);
     if(!assert_token("while"))
         return false;
@@ -228,8 +224,6 @@ static bool interpreta_istruzione(bool should_execute) {
 }
 
 static bool interpreta_programma(bool should_execute) {
-    puts("reading program"); // DEBUG
-
     read_next_token(true);
     if(!assert_token("begin"))
         return false;
@@ -241,7 +235,6 @@ static bool interpreta_programma(bool should_execute) {
     // Interpreta una sequenza fino a quando non si incontra 'end'
     unread_latest_token();
     while(true) {
-        puts("new inst"); // DEBUG
         if(!interpreta_istruzione(should_execute))
             return false;
 
