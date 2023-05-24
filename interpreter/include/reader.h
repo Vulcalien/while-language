@@ -22,9 +22,13 @@
 
 extern char *latest_token;
 
+extern void reader_init(void);
 extern void reader_set_input(FILE *in);
 
-extern char *read_next_token(void);
+extern char *read_next_token(bool consume_token);
+extern char *read_next_token_n(bool consume_token, int n);
+
+extern void unread_chars(int count);
 extern void unread_latest_token(void);
 
 extern bool check_token(char *expected_token);

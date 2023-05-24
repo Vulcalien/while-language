@@ -19,6 +19,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#define DEBUG
+
 #define CONTENT_BLOCK_SIZE (4 * 1024)
 #define TOKEN_MAX_SIZE (16 * 1024)
 
@@ -28,6 +30,10 @@ static int reading_index = 0;
 /*static int reading_line = 0;*/
 
 static FILE *input;
+
+void reader_init(void) {
+    latest_token = malloc(TOKEN_MAX_SIZE * sizeof(char));
+}
 
 void reader_set_input(FILE *in) {
     input = in;
@@ -51,7 +57,7 @@ static char read_char(void) {
     return content[reading_index++];
 }
 
-static void unread_chars(int count) {
+void unread_chars(int count) {
     reading_index -= count;
     if(reading_index < 0)
         reading_index = 0;
@@ -69,25 +75,34 @@ static void skip_whitespaces(void) {
     unread_char();
 }
 
-char *read_next_token(void) {
-    if(!latest_token)
-        latest_token = malloc(TOKEN_MAX_SIZE * sizeof(char));
+char *read_next_token_n(bool consume_token, int n) {
+    int old_reading_index = reading_index;
 
     skip_whitespaces();
 
     int i = 0;
-    while(i < TOKEN_MAX_SIZE - 1) {
+    while(i < TOKEN_MAX_SIZE - 1 && i < n) {
         char c = read_char();
 
-        if(isspace(c))
+        if(isspace(c)) {
+            unread_char();
             break;
-        else
+        } else {
             latest_token[i] = c;
+        }
 
         i++;
     }
     latest_token[i] = '\0';
+
+    if(!consume_token)
+        reading_index = old_reading_index;
+
     return latest_token;
+}
+
+char *read_next_token(bool consume_token) {
+    return read_next_token_n(consume_token, TOKEN_MAX_SIZE - 1);
 }
 
 void unread_latest_token(void) {
@@ -101,8 +116,15 @@ bool check_token(char *expected_token) {
 }
 
 bool assert_token(char *expected_token) {
-    if(check_token(expected_token))
+    if(check_token(expected_token)) {
+        #ifdef DEBUG
+            printf(
+                "\033[1;32mDEBUG: '%s' asserted successfully\033[0m\n",
+                expected_token
+            );
+        #endif
         return true;
+    }
 
     fprintf(
         stderr,

@@ -70,7 +70,9 @@ static bool interpreta_test(bool *value) {
 }
 
 static bool interpreta_while(void) {
-    read_next_token();
+    puts("reading while"); // DEBUG
+
+    read_next_token(true);
     if(!assert_token("while"))
         return false;
 
@@ -82,19 +84,15 @@ static bool interpreta_while(void) {
         if(!test_value)
             break;
 
-        read_next_token();
+        read_next_token(true);
         if(!assert_token("do"))
             return false;
 
-        read_next_token();
+        read_next_token(false);
         if(check_token("begin")) {
-            unread_latest_token();
-
             if(!interpreta_programma())
                 return false;
         } else {
-            unread_latest_token();
-
             if(!interpreta_istruzione())
                 return false;
         }
@@ -103,24 +101,23 @@ static bool interpreta_while(void) {
 }
 
 static bool interpreta_istruzione(void) {
-    read_next_token();
+    read_next_token(false);
 
-    if(check_token("while")) {
-        unread_latest_token();
+    if(check_token("while"))
         return interpreta_while();
-    }
 
     // Se non è un 'while', è un'assegnazione
-    unread_latest_token();
     return interpreta_assegnazione();
 }
 
 static bool interpreta_programma(void) {
-    read_next_token();
+    puts("reading program"); // DEBUG
+
+    read_next_token(true);
     if(!assert_token("begin"))
         return false;
 
-    read_next_token();
+    read_next_token(true);
     if(check_token("end"))
         return true;
 
@@ -129,20 +126,21 @@ static bool interpreta_programma(void) {
     while(true) {
         interpreta_istruzione();
 
-        read_next_token();
+        read_next_token(true);
         if(check_token("end"))
             break;
         else if(!assert_token(";"))
             return false;
     }
 
-    read_next_token();
+    read_next_token(true);
     if(!assert_token("end"))
         return false;
     return true;
 }
 
 int main(int argc, char *argv[]) {
+    reader_init();
     reader_set_input(stdin);
 
     interpreta_programma();
