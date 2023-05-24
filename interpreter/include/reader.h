@@ -31,6 +31,9 @@ extern char *read_next_token_n(bool consume_token, int n);
 extern void unread_chars(int count);
 extern void unread_latest_token(void);
 
+extern int  reader_get_position(void);
+extern void reader_set_position(int position);
+
 extern bool check_token(char *expected_token);
 extern bool assert_token(char *expected_token);
 

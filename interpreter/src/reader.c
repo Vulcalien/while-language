@@ -25,7 +25,7 @@
 char *latest_token = NULL;
 
 static int reading_index = 0;
-/*static int reading_line = 0;*/
+static int content_length = 0;
 
 static FILE *input;
 
@@ -39,7 +39,6 @@ void reader_set_input(FILE *in) {
 
 static char read_char(void) {
     static char *content = NULL;
-    static int content_length = 0;
 
     // If there is no content left to read, read from 'input'
     if(reading_index == content_length) {
@@ -105,6 +104,33 @@ char *read_next_token(bool consume_token) {
 
 void unread_latest_token(void) {
     unread_chars(strlen(latest_token));
+}
+
+int reader_get_position(void) {
+    return reading_index;
+}
+
+void reader_set_position(int position) {
+    #ifdef DEBUG
+        printf("\033[1;32mDEBUG: jumping to %d\033[0m\n", position);
+    #endif
+
+    bool is_valid = false;
+    if(position < 0)
+        position = 0;
+    else if(position >= content_length)
+        position = content_length - 1;
+    else
+        is_valid = true;
+
+    if(!is_valid) {
+        fputs(
+            "Errore dell'interprete: salto a posizione invalida",
+            stderr
+        );
+    }
+
+    reading_index = position;
 }
 
 bool check_token(char *expected_token) {

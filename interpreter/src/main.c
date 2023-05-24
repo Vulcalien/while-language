@@ -159,7 +159,21 @@ static bool interpreta_assegnazione(void) {
 }
 
 static bool interpreta_test(bool *value) {
-    // TODO
+    int index_left;
+    if(!decodifica_variabile(&index_left))
+        return false;
+
+    read_next_token_n(true, 2);
+    if(!assert_token("!="))
+        return false;
+
+    int index_right;
+    if(!decodifica_variabile(&index_right))
+        return false;
+
+    // Confronta le due variabili
+    *value = (get_variable(index_left) != get_variable(index_right));
+
     return true;
 }
 
@@ -170,6 +184,7 @@ static bool interpreta_while(void) {
     if(!assert_token("while"))
         return false;
 
+    int position = reader_get_position();
     while(true) {
         bool test_value;
         if(!interpreta_test(&test_value))
@@ -190,6 +205,8 @@ static bool interpreta_while(void) {
             if(!interpreta_istruzione())
                 return false;
         }
+
+        reader_set_position(position);
     }
     return true;
 }
