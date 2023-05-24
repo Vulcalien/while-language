@@ -22,7 +22,7 @@
 #define CONTENT_BLOCK_SIZE (4 * 1024)
 #define TOKEN_MAX_SIZE (16 * 1024)
 
-char *latest_token = NULL;
+static char *latest_token = NULL;
 
 static int reading_index = 0;
 static int content_length = 0;

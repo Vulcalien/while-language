@@ -20,8 +20,6 @@
 
 #include <stdio.h>
 
-extern char *latest_token;
-
 extern void reader_init(void);
 extern void reader_set_input(FILE *in);
 
