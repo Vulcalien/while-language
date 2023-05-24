@@ -1,0 +1,17 @@
+begin
+    x0 := 0;
+    x0 := succ(x0);
+    x0 := succ(x0);
+    x0 := succ(x0);
+    x0 := succ(x0);
+
+    x1 := 0;
+    x1 := succ(x1);
+    x1 := succ(x1);
+
+    x2 := 0;
+    while x1 != x2 do begin
+        x0 := succ(x0);
+        x1 := pred(x1)
+    end
+end
