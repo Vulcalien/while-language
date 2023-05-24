@@ -53,11 +53,11 @@ ________________________________________________________________________
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
-static bool interpreta_assegnazione(void);
+static bool interpreta_assegnazione(bool should_execute);
 static bool interpreta_test(bool *value);
-static bool interpreta_while(void);
-static bool interpreta_istruzione(void);
-static bool interpreta_programma(void);
+static bool interpreta_while(bool should_execute);
+static bool interpreta_istruzione(bool should_execute);
+static bool interpreta_programma(bool should_execute);
 
 // --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- ---
 
@@ -93,12 +93,14 @@ static bool decodifica_variabile(int *index) {
     return false;
 }
 
-static bool assegna_zero(int index_left) {
-    set_variable(index_left, 0);
+static bool assegna_zero(int index_left, bool should_execute) {
+    if(should_execute)
+        set_variable(index_left, 0);
     return true;
 }
 
-static bool assegna_succ_o_pred(int index_left, bool is_succ) {
+static bool assegna_succ_o_pred(int index_left, bool is_succ,
+                                bool should_execute) {
     read_next_token_n(true, 1);
     if(!assert_token("("))
         return false;
@@ -114,7 +116,8 @@ static bool assegna_succ_o_pred(int index_left, bool is_succ) {
     else
         value_right--;
 
-    set_variable(index_left, value_right);
+    if(should_execute)
+        set_variable(index_left, value_right);
 
     read_next_token_n(true, 1);
     if(!assert_token(")"))
@@ -123,7 +126,7 @@ static bool assegna_succ_o_pred(int index_left, bool is_succ) {
     return true;
 }
 
-static bool interpreta_assegnazione(void) {
+static bool interpreta_assegnazione(bool should_execute) {
     puts("reading assign"); // DEBUG
 
     int index_left;
@@ -137,15 +140,15 @@ static bool interpreta_assegnazione(void) {
     // Determina quale assegnamento va eseguito
     read_next_token_n(true, 1);
     if(check_token("0"))
-        return assegna_zero(index_left);
+        return assegna_zero(index_left, should_execute);
 
     unread_chars(1);
 
     read_next_token_n(true, 4);
     if(check_token("succ"))
-        return assegna_succ_o_pred(index_left, true);
+        return assegna_succ_o_pred(index_left, true, should_execute);
     else if(check_token("pred"))
-        return assegna_succ_o_pred(index_left, false);
+        return assegna_succ_o_pred(index_left, false, should_execute);
 
     unread_latest_token();
     char *token = read_next_token(true);
@@ -177,7 +180,7 @@ static bool interpreta_test(bool *value) {
     return true;
 }
 
-static bool interpreta_while(void) {
+static bool interpreta_while(bool should_execute) {
     puts("reading while"); // DEBUG
 
     read_next_token(true);
@@ -185,13 +188,14 @@ static bool interpreta_while(void) {
         return false;
 
     int position = reader_get_position();
-    while(true) {
-        bool test_value;
+
+    bool test_value;
+    do {
         if(!interpreta_test(&test_value))
             return false;
 
-        /*if(!test_value)*/
-            /*break;*/
+        if(!should_execute)
+            test_value = false;
 
         read_next_token(true);
         if(!assert_token("do"))
@@ -199,29 +203,31 @@ static bool interpreta_while(void) {
 
         read_next_token(false);
         if(check_token("begin")) {
-            if(!interpreta_programma())
+            if(!interpreta_programma(test_value))
                 return false;
         } else {
-            if(!interpreta_istruzione())
+            if(!interpreta_istruzione(test_value))
                 return false;
         }
 
-        reader_set_position(position);
-    }
+        if(test_value)
+            reader_set_position(position);
+    } while(test_value);
+
     return true;
 }
 
-static bool interpreta_istruzione(void) {
+static bool interpreta_istruzione(bool should_execute) {
     read_next_token(false);
 
     if(check_token("while"))
-        return interpreta_while();
+        return interpreta_while(should_execute);
 
     // Se non è un 'while', è un'assegnazione
-    return interpreta_assegnazione();
+    return interpreta_assegnazione(should_execute);
 }
 
-static bool interpreta_programma(void) {
+static bool interpreta_programma(bool should_execute) {
     puts("reading program"); // DEBUG
 
     read_next_token(true);
@@ -236,7 +242,7 @@ static bool interpreta_programma(void) {
     unread_latest_token();
     while(true) {
         puts("new inst"); // DEBUG
-        if(!interpreta_istruzione())
+        if(!interpreta_istruzione(should_execute))
             return false;
 
         read_next_token(true);
@@ -256,5 +262,5 @@ int main(int argc, char *argv[]) {
     reader_init();
     reader_set_input(stdin);
 
-    interpreta_programma();
+    interpreta_programma(true);
 }
