@@ -81,7 +81,7 @@ char *read_next_token_n(bool consume_token, int n) {
     while(i < TOKEN_MAX_SIZE - 1 && i < n) {
         char c = read_char();
 
-        if(isspace(c)) {
+        if(isspace(c) || c == EOF) {
             unread_char();
             break;
         } else {

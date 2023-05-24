@@ -262,7 +262,18 @@ static bool interpreta_programma(bool should_execute) {
 
 int main(int argc, char *argv[]) {
     reader_init();
-    reader_set_input(stdin);
+
+    if(argc >= 2) {
+        FILE *f = fopen(argv[1], "r");
+        if(!f) {
+            perror(argv[1]);
+            return 1;
+        }
+        reader_set_input(f);
+    } else {
+        reader_set_input(stdin);
+    }
 
     interpreta_programma(true);
+    return 0;
 }
