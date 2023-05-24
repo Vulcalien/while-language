@@ -97,7 +97,7 @@ static bool assegna_zero(int index_left) {
     return true;
 }
 
-static bool assegna_succ_o_prec(int index_left, bool is_succ) {
+static bool assegna_succ_o_pred(int index_left, bool is_succ) {
     read_next_token_n(true, 1);
     if(!assert_token("("))
         return false;
@@ -143,16 +143,16 @@ static bool interpreta_assegnazione(void) {
 
     read_next_token_n(true, 4);
     if(check_token("succ"))
-        return assegna_succ_o_prec(index_left, true);
-    else if(check_token("prec"))
-        return assegna_succ_o_prec(index_left, false);
+        return assegna_succ_o_pred(index_left, true);
+    else if(check_token("pred"))
+        return assegna_succ_o_pred(index_left, false);
 
     unread_latest_token();
     char *token = read_next_token(true);
 
     fprintf(
         stderr,
-        "Errore: '0', 'succ' o 'prec' erano attesi, "
+        "Errore: '0', 'succ' o 'pred' erano attesi, "
         "ma e' stato trovato '%s'\n", token
     );
     return false;

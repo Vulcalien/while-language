@@ -19,8 +19,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#define DEBUG
-
 #define CONTENT_BLOCK_SIZE (4 * 1024)
 #define TOKEN_MAX_SIZE (16 * 1024)
 
