@@ -245,10 +245,12 @@ static bool interpreta_programma(bool should_execute) {
         if(!interpreta_istruzione(should_execute))
             return false;
 
-        read_next_token(true);
+        read_next_token(false);
         if(check_token("end"))
             break;
-        else if(!assert_token(";"))
+
+        read_next_token_n(true, 1);
+        if(!assert_token(";"))
             return false;
     }
 
